@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/can.h>
+#include <linux/can/raw.h>
 #include <errno.h>
 #include <stdlib.h>
 
@@ -71,6 +72,31 @@ int16_t socketcanInit(SocketCANInstance* out_ins, const char* can_iface_name)
     addr.can_family = AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
 
+    uint32_t canfd_on = 1;
+    bool can_fd = false;
+
+    if (ioctl(fd, SIOCGIFMTU, &ifr) < 0) 
+    {
+        goto fail1;
+    }
+    /* Check whether CAN_FD is possible */
+    if (ifr.ifr_mtu == CANFD_MTU) 
+    {
+        /* Try to switch into CAN_FD mode */
+        if (setsockopt(fd, SOL_CAN_RAW, CAN_RAW_FD_FRAMES, &canfd_on, sizeof(canfd_on))) {
+            goto fail1;
+        } 
+        else 
+        {
+        can_fd = true;
+        }
+
+    } 
+    else 
+    {
+        goto fail1;
+    }
+
     const int bind_result = bind(fd, (struct sockaddr*)&addr, sizeof(addr));
     if (bind_result < 0)
     {
@@ -114,6 +140,46 @@ int16_t socketcanTransmit(SocketCANInstance* ins, const CanardCANFrame* frame, i
         return -EIO;
     }
 
+    struct can_frame transmit_frame;
+    memset(&transmit_frame, 0, sizeof(transmit_frame));
+    transmit_frame.can_id = frame->id;                  // TODO: Map flags properly
+    transmit_frame.can_dlc = frame->data_len;
+    memcpy(transmit_frame.data, frame->data, frame->data_len);
+
+    const ssize_t nbytes = write(ins->fd, &transmit_frame, sizeof(transmit_frame));
+    if (nbytes < 0)
+    {
+        return getErrorCode();
+    }
+    if ((size_t)nbytes != sizeof(transmit_frame))
+    {
+        return -EIO;
+    }
+
+    return 1;
+}
+
+int16_t socketcanFdTransmit(SocketCANInstance* ins, const CanardCANFrame* frame, int32_t timeout_msec)
+{
+    struct pollfd fds;
+    memset(&fds, 0, sizeof(fds));
+    fds.fd = ins->fd;
+    fds.events |= POLLOUT;
+
+    const int poll_result = poll(&fds, 1, timeout_msec);
+    if (poll_result < 0)
+    {
+        return getErrorCode();
+    }
+    if (poll_result == 0)
+    {
+        return 0;
+    }
+    if (((uint32_t)fds.revents & (uint32_t)POLLOUT) == 0)
+    {
+        return -EIO;
+    }
+    struct canfd_frame transmit_frame;
     struct can_frame transmit_frame;
     memset(&transmit_frame, 0, sizeof(transmit_frame));
     transmit_frame.can_id = frame->id;                  // TODO: Map flags properly

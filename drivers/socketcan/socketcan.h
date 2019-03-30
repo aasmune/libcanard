@@ -39,6 +39,8 @@ int16_t socketcanClose(SocketCANInstance* ins);
  */
 int16_t socketcanTransmit(SocketCANInstance* ins, const CanardCANFrame* frame, int32_t timeout_msec);
 
+int16_t socketcanFdTransmit(SocketCANInstance* ins, const CanardCANFrame* frame, int32_t timeout_msec);
+
 /**
  * Receives a CanardCANFrame from the CAN socket.
  * Use negative timeout to block infinitely.
