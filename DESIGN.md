@@ -356,11 +356,11 @@ uint8_t canardGetLocalNodeID(const CanardInstance* ins);
  * If the node is in passive mode, only single-frame transfers will be allowed.
  */
 int canardPublishMessage(CanardInstance* ins,
-                    uint16_t subject_id,
-                    uint8_t* inout_transfer_id,
-                    uint8_t priority,
-                    const void* payload,
-                    uint16_t payload_len);
+                         uint16_t subject_id,
+                         uint8_t* inout_transfer_id,
+                         uint8_t priority,
+                         const void* payload,
+                         uint16_t payload_len);
 
 /**
  * Sends a request or a response transfer.
@@ -439,10 +439,10 @@ typedef void (*CanardOnTransferReception)(CanardInstance* ins,
  *  | [33, 64]   | true            | int64_t, or 64-bit float                 |
  */
 int canardDecodePrimitive(const CanardRxTransfer* transfer,    ///< The RX transfer where the data will be copied from
-                       uint32_t bit_offset,                 ///< Offset, in bits, from the beginning of the transfer
-                       uint8_t bit_length,                  ///< Length of the value, in bits; see the table
-                       bool value_is_signed,                ///< True if the value can be negative; see the table
-                       void* out_value);                    ///< Pointer to the output storage; see the table
+                          uint32_t bit_offset,                 ///< Offset, in bits, from the beginning of the transfer
+                          uint8_t bit_length,                  ///< Length of the value, in bits; see the table
+                          bool value_is_signed,                ///< True if the value can be negative; see the table
+                          void* out_value);                    ///< Pointer to the output storage; see the table
 
 /**
  * This function can be used to encode values for later transmission in a UAVCAN transfer. It encodes a scalar value -
@@ -465,9 +465,9 @@ int canardDecodePrimitive(const CanardRxTransfer* transfer,    ///< The RX trans
  *  | [33, 64]   | uint64_t, int64_t, or 64-bit float       |
  */
 void canardEncodePrimitive(void* destination,      ///< Destination buffer where the result will be stored
-                        uint32_t bit_offset,    ///< Offset, in bits, from the beginning of the destination buffer
-                        uint8_t bit_length,     ///< Length of the value, in bits; see the table
-                        const void* value);     ///< Pointer to the value; see the table
+                           uint32_t bit_offset,    ///< Offset, in bits, from the beginning of the destination buffer
+                           uint8_t bit_length,     ///< Length of the value, in bits; see the table
+                           const void* value);     ///< Pointer to the value; see the table
 
 /**
  * This function can be invoked by the application to release pool blocks that are used to store

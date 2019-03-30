@@ -71,12 +71,12 @@ msg.vendor_specific_status_code = vendor_status_code;
 const uint32_t len_of_packed_msg = uavcan_protocol_NodeStatus_encode(&msg, packed_uavcan_msg_buf);
 
 (void) canardPublishMessage(&g_canard,
-                       UAVCAN_PROTOCOL_NODESTATUS_SIGNATURE,
-                       UAVCAN_PROTOCOL_NODESTATUS_ID,
-                       &g_bc_node_status_transfer_id,
-                       CANARD_TRANSFER_PRIORITY_MEDIUM,
-                       packed_uavcan_msg_buf,
-                       len_of_packed_msg);
+                            UAVCAN_PROTOCOL_NODESTATUS_SIGNATURE,
+                            UAVCAN_PROTOCOL_NODESTATUS_ID,
+                            &g_bc_node_status_transfer_id,
+                            CANARD_TRANSFER_PRIORITY_MEDIUM,
+                            packed_uavcan_msg_buf,
+                            len_of_packed_msg);
 ```
 
 Dynamic arrays also have the `_len` field,
